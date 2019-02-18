@@ -1,22 +1,200 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
-    <title>간단한 지도 표시하기</title>
-    <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?clientId=PpTUbFef9dwsXvxlaeh4"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+<title>Chart Overlay</title>
+ 
+ <!-- API key를 포함하여 브이월드 API URL을 지정하여 호출끝  --> 
+ <script type="text/javascript" src="http://map.vworld.kr/js/vworldMapInit.js.do?version=2.0&apiKey=2C7437DD-3B9C-3E97-9895-3257E999569C"></script>
 </head>
+
 <body>
-<div id="map" style="width:100%;height:400px;"></div>
+ <div id="vmap" style="width:100%;height:350px;left:0px;top:0px"></div>
+ <!-- chart control -->
+ <button type="button" onclick="addbarChart();">차트추가</button>
+ <button type="button" onclick="barChartHide();">차트숨기기</button>
+ <button type="button" onclick="barChartShow();">차트보이기</button>
+ <button type="button" onclick="clearChart();">차트삭제</button>
+<div>
+</div>
+<!-- chart control -->
 
-<script>
-var mapOptions = {
-    center: new naver.maps.LatLng(37.3595704, 127.105399),
-    zoom: 10
-};
+ <script>
+ 
+ var vmap;
+ var bar,bar1,bar2;
+ var pos,pos1,pos2;
 
-var map = new naver.maps.Map('map', mapOptions);
-</script>
+  vw.ol3.MapOptions = {
+     basemapType: vw.ol3.BasemapType.GRAPHIC
+   , controlDensity: vw.ol3.DensityType.EMPTY
+   , interactionDensity: vw.ol3.DensityType.FULL
+   , controlsAutoArrange: true
+   , homePosition: vw.ol3.CameraPosition
+   , initPosition: vw.ol3.CameraPosition
+  }; 
+    
+  vmap = new vw.ol3.Map("vmap",  vw.ol3.MapOptions);  
+  
+  pos = [14135087.165466234,4518348.216242027];
+  var size = [100,100];
+  bar = new vw.ol3.chart.Bar(size);
+  
+  bar.title = "서울특별시";
+  bar.legend = new vw.ol3.chart.ChartLegend();
+  bar.legend.visible = true;
+  var styles = new Array();
+  styles[0] = {
+    color: '#d26900',
+    label: '계',
+    legendLabel : "계"     
+  };
+  styles[1] = {
+    color: '#d89243',
+    label: "남",
+    legendLabel : "남"     
+  };
+  styles[2] = {
+    color: "#726056",
+    label: "여",
+    legendLabel : "여"     
+  };
+  bar.styles = styles;
+  bar.values = [10195318,5041336,5153982];  //통계값
+     
+  bar.setPosition(pos);
+  
+  vmap.addOverlay(bar);
+  
+  pos1 = [14368621.862591665,4188437.443236093];
+  
+  var size1 = [150,150];
+  
+  bar1 = new vw.ol3.chart.Bar(size1);
+  
+  bar1.title = "부산광역시";
+  bar1.legend = new vw.ol3.chart.ChartLegend();
+  bar1.legend.visible = true;
+  var styles1 = new Array();
+  styles1[0] = {
+    color: '#d26900',
+    label: '계',
+    legendLabel : "계"     
+  };
+  styles1[1] = {
+    color: '#d89243',
+    label: "남",
+    legendLabel : "남"     
+  };
+  styles1[2] = {
+    color: "#726056",
+    label: "여",
+    legendLabel : "여"     
+  };
+  bar1.styles = styles1;
+  bar1.values = [5000000,2000000,3000000];  //통계값
+  
+  
+  vmap.addOverlay(bar1);
+  
+  bar1.setPosition(pos1);
+  
+  
+  var groupChart = new vw.ol3.chart.ChartGroup(vmap);
+  groupChart.chartList.push(bar);
+  groupChart.chartList.push(bar1);
+  groupChart.styles = styles1;
+  groupChart.legend = bar1.legend;
+  
+  var positions = [100,200];
+  groupChart.draw(vw.ol3.SiteAlignType.top_right,positions);
+ 
+ function addbarChart() {
+  pos2 = [14119486.75297315,4184954.52457039];
+  
+  var size1 = [150,150];
+  
+  bar2 = new vw.ol3.chart.Bar(size1);
+  
+  bar2.title = "광주광역시";
+  bar2.legend = new vw.ol3.chart.ChartLegend();
+  bar2.legend.visible = true;
+  var styles1 = new Array();
+  styles1[0] = {
+    color: '#d26900',
+    label: '계',
+    legendLabel : "계"     
+  };
+  styles1[1] = {
+    color: '#d89243',
+    label: "남",
+    legendLabel : "남"     
+  };
+  styles1[2] = {
+    color: "#726056",
+    label: "여",
+    legendLabel : "여"     
+  };
+  bar2.styles = styles1;
+  bar2.values = [5000000,2000000,3000000];  //통계값
+  
+  bar2.draw();
+  
+  vmap.addOverlay(bar2);
+  
+  bar2.setPosition(pos2);
+  
+ };
+ 
+ function barChartHide() {
+  if ( bar != null) {
+   bar.setVisible(false);
+  }
+  
+  if ( bar1 != null ) {
+   bar1.setVisible(false); 
+  } 
+  
+  if ( bar2 != null ) {
+   bar2.setVisible(false); 
+  }
+ }
+
+ function barChartShow() {
+  if ( bar != null) {
+   bar.setVisible(true); 
+  }
+  
+  if ( bar1 != null ) {
+   bar1.setVisible(true); 
+  } 
+  
+  if ( bar2 != null ) {
+   bar2.setVisible(true); 
+  }
+ }
+ 
+ function clearChart() {
+  if(bar != null) {
+   try{
+   vmap.removeOverlay(bar);
+   }catch(e) {}
+   
+  }
+  if ( bar1 != null ) {
+   try{
+   vmap.removeOverlay(bar1);
+   }catch(e) {}
+  }
+  
+  if ( bar2 != null ) {
+   try{
+   vmap.removeOverlay(bar2);
+   }catch(e) {}
+  }
+ }
+  
+ </script>  
 </body>
 </html>
