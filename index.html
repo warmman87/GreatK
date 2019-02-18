@@ -1,200 +1,96 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-<title>Chart Overlay</title>
- 
- <!-- API key를 포함하여 브이월드 API URL을 지정하여 호출끝  --> 
- <script type="text/javascript" src="http://map.vworld.kr/js/vworldMapInit.js.do?version=2.0&apiKey=2C7437DD-3B9C-3E97-9895-3257E999569C"></script>
-</head>
+							<html xmlns="http://www.w3.org/1999/xhtml">
+							  <head>
+								<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+								<title>2DMap</title>
+								<script src="https://www.openlayers.org/api/2.13/OpenLayers.js" type="text/javascript"></script>
+								<!-- <SCRIPT language="JavaScript" type="text/javascript" src="http://map.vworld.kr/js/apis.do?type=Base&apiKey=767B7ADF-10BA-3D86-AB7E-02816B5B92E9"></SCRIPT> -->
+								<SCRIPT language="JavaScript" type="text/javascript" src="http://map.vworld.kr/js/apis.do?type=Base&apiKey=2C7437DD-3B9C-3E97-9895-3257E999569C"></SCRIPT>
+								 
+								<script type="text/javascript">
+								  var map;
+									var mapBounds = new OpenLayers.Bounds(123 , 32, 134 , 43);
+									var mapMinZoom = 7;
+									var mapMaxZoom = 19;
 
-<body>
- <div id="vmap" style="width:100%;height:350px;left:0px;top:0px"></div>
- <!-- chart control -->
- <button type="button" onclick="addbarChart();">차트추가</button>
- <button type="button" onclick="barChartHide();">차트숨기기</button>
- <button type="button" onclick="barChartShow();">차트보이기</button>
- <button type="button" onclick="clearChart();">차트삭제</button>
-<div>
-</div>
-<!-- chart control -->
+									// avoid pink tiles
+									OpenLayers.IMAGE_RELOAD_ATTEMPTS = 3;
+									OpenLayers.Util.onImageLoadErrorColor = "transparent";
+									
+									function init(){
+									var options = {
+										controls: [],
+										projection: new OpenLayers.Projection("EPSG:900913"),
+										displayProjection: new OpenLayers.Projection("EPSG:4326"),
+										units: "m",
+										controls : [],
+										numZoomLevels:21,
+										maxResolution: 156543.0339,
+										maxExtent: new OpenLayers.Bounds(-20037508.34, -20037508.34, 20037508.34, 20037508.34)
+										};
+									map = new OpenLayers.Map('map', options);
+									
+									var osm = new OpenLayers.Layer.OSM();   				
+									var options = {serviceVersion : "",
+										layername: "",
+										isBaseLayer: false,
+										opacity : 1,
+										type: 'png',
+										transitionEffect: 'resize',
+										tileSize: new OpenLayers.Size(256,256),
+										min_level : 7,
+										max_level : 18,
+										buffer:0};
+									//======================================
+									//1. 배경지도 추가하기
+									vBase = new vworld.Layers.Base('VBASE');
+									if (vBase != null){map.addLayer(vBase);}
+									//2. 영상지도 추가하기
+									vSAT = new vworld.Layers.Satellite('VSAT');
+									if (vSAT != null) {map.addLayer(vSAT);};
+									//3. 하이브리드지도 추가하기
+									vHybrid = new vworld.Layers.Hybrid('VHYBRID');
+									if (vHybrid != null) {map.addLayer(vHybrid);} 
+									//4. Gray지도 추가하기
+									vGray = new vworld.Layers.Gray('VGRAY');
+									if (vGray != null){map.addLayer(vGray);}
+									//5. Midnight지도 추가하기
+									vMidnight = new vworld.Layers.Midnight('VMIDNIGHT');
+									if (vMidnight != null){map.addLayer(vMidnight);}
+									//===========================================
+									
+									map.addLayers([osm]);
 
- <script>
- 
- var vmap;
- var bar,bar1,bar2;
- var pos,pos1,pos2;
+									var switcherControl = new OpenLayers.Control.LayerSwitcher();
+									map.addControl(switcherControl);
+									switcherControl.maximizeControl();
 
-  vw.ol3.MapOptions = {
-     basemapType: vw.ol3.BasemapType.GRAPHIC
-   , controlDensity: vw.ol3.DensityType.EMPTY
-   , interactionDensity: vw.ol3.DensityType.FULL
-   , controlsAutoArrange: true
-   , homePosition: vw.ol3.CameraPosition
-   , initPosition: vw.ol3.CameraPosition
-  }; 
-    
-  vmap = new vw.ol3.Map("vmap",  vw.ol3.MapOptions);  
-  
-  pos = [14135087.165466234,4518348.216242027];
-  var size = [100,100];
-  bar = new vw.ol3.chart.Bar(size);
-  
-  bar.title = "서울특별시";
-  bar.legend = new vw.ol3.chart.ChartLegend();
-  bar.legend.visible = true;
-  var styles = new Array();
-  styles[0] = {
-    color: '#d26900',
-    label: '계',
-    legendLabel : "계"     
-  };
-  styles[1] = {
-    color: '#d89243',
-    label: "남",
-    legendLabel : "남"     
-  };
-  styles[2] = {
-    color: "#726056",
-    label: "여",
-    legendLabel : "여"     
-  };
-  bar.styles = styles;
-  bar.values = [10195318,5041336,5153982];  //통계값
-     
-  bar.setPosition(pos);
-  
-  vmap.addOverlay(bar);
-  
-  pos1 = [14368621.862591665,4188437.443236093];
-  
-  var size1 = [150,150];
-  
-  bar1 = new vw.ol3.chart.Bar(size1);
-  
-  bar1.title = "부산광역시";
-  bar1.legend = new vw.ol3.chart.ChartLegend();
-  bar1.legend.visible = true;
-  var styles1 = new Array();
-  styles1[0] = {
-    color: '#d26900',
-    label: '계',
-    legendLabel : "계"     
-  };
-  styles1[1] = {
-    color: '#d89243',
-    label: "남",
-    legendLabel : "남"     
-  };
-  styles1[2] = {
-    color: "#726056",
-    label: "여",
-    legendLabel : "여"     
-  };
-  bar1.styles = styles1;
-  bar1.values = [5000000,2000000,3000000];  //통계값
-  
-  
-  vmap.addOverlay(bar1);
-  
-  bar1.setPosition(pos1);
-  
-  
-  var groupChart = new vw.ol3.chart.ChartGroup(vmap);
-  groupChart.chartList.push(bar);
-  groupChart.chartList.push(bar1);
-  groupChart.styles = styles1;
-  groupChart.legend = bar1.legend;
-  
-  var positions = [100,200];
-  groupChart.draw(vw.ol3.SiteAlignType.top_right,positions);
- 
- function addbarChart() {
-  pos2 = [14119486.75297315,4184954.52457039];
-  
-  var size1 = [150,150];
-  
-  bar2 = new vw.ol3.chart.Bar(size1);
-  
-  bar2.title = "광주광역시";
-  bar2.legend = new vw.ol3.chart.ChartLegend();
-  bar2.legend.visible = true;
-  var styles1 = new Array();
-  styles1[0] = {
-    color: '#d26900',
-    label: '계',
-    legendLabel : "계"     
-  };
-  styles1[1] = {
-    color: '#d89243',
-    label: "남",
-    legendLabel : "남"     
-  };
-  styles1[2] = {
-    color: "#726056",
-    label: "여",
-    legendLabel : "여"     
-  };
-  bar2.styles = styles1;
-  bar2.values = [5000000,2000000,3000000];  //통계값
-  
-  bar2.draw();
-  
-  vmap.addOverlay(bar2);
-  
-  bar2.setPosition(pos2);
-  
- };
- 
- function barChartHide() {
-  if ( bar != null) {
-   bar.setVisible(false);
-  }
-  
-  if ( bar1 != null ) {
-   bar1.setVisible(false); 
-  } 
-  
-  if ( bar2 != null ) {
-   bar2.setVisible(false); 
-  }
- }
-
- function barChartShow() {
-  if ( bar != null) {
-   bar.setVisible(true); 
-  }
-  
-  if ( bar1 != null ) {
-   bar1.setVisible(true); 
-  } 
-  
-  if ( bar2 != null ) {
-   bar2.setVisible(true); 
-  }
- }
- 
- function clearChart() {
-  if(bar != null) {
-   try{
-   vmap.removeOverlay(bar);
-   }catch(e) {}
-   
-  }
-  if ( bar1 != null ) {
-   try{
-   vmap.removeOverlay(bar1);
-   }catch(e) {}
-  }
-  
-  if ( bar2 != null ) {
-   try{
-   vmap.removeOverlay(bar2);
-   }catch(e) {}
-  }
- }
-  
- </script>  
-</body>
-</html>
+									map.zoomToExtent( mapBounds.transform(map.displayProjection, map.projection ) );
+									map.zoomTo(11);
+										
+									map.addControl(new OpenLayers.Control.PanZoomBar());
+									//map.addControl(new OpenLayers.Control.MousePosition());
+									map.addControl(new OpenLayers.Control.Navigation());
+									//map.addControl(new OpenLayers.Control.MouseDefaults()); //2.12 No Support
+									map.addControl(new OpenLayers.Control.Attribution({separator:" "}))
+								}
+							   function deleteLayerByName(name){
+									for (var i=0, len=map.layers.length; i<len; i++) {
+										var layer = map.layers[i];
+										if (layer.name == name) {
+											map.removeLayer(layer);
+											//return layer;
+											break;
+										}
+									}
+								}
+								
+								</script>
+							  </head>
+							  <body onload="init()">
+								<div id="map" style="height:600px;"></div>
+								<div >
+									<button type="button" onclick="javascript:deleteLayerByName('VHYBRID');" name="rpg_1" >레이어삭제하기</button>
+								</div>		   
+							  </body>
+							</html>
+						
